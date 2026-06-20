@@ -11,17 +11,30 @@ import SpeakersView from '../views/SpeakersView.vue'
 import RoomsView from '../views/RoomsView.vue'
 import ReportsView from '../views/ReportsView.vue'
 import SettingsView from '../views/SettingsView.vue'
-import EvaluationsView from '../views/EvaluationsView.vue'
-import SanteView from '../views/SanteView.vue'
-import PaiementsView from '../views/PaiementsView.vue'
+
 import QuotaView from '../views/QuotaView.vue'
 import CarsView from '../views/CarsView.vue'
 import UsersView from '../views/UsersView.vue'
 
-// Shared stub used by the new collapsible-menu sub-pages until each one
-// gets its own dedicated view. Swap it out per route below whenever a
-// real view is ready (e.g. component: SenafadOption1View).
-import PlaceholderView from '../views/Placeholderview.vue'
+// Pages vides pour les sous-menus SENAFAD / SENAFI / SENAFOCI / SENACEF /
+// SENASIP / SENAES / SENAMO / SENACREX — à remplacer par le vrai contenu
+// quand chaque page sera prête.
+import SenafadOption1View from '../views/sena/SenafadOption1View.vue'
+import SenafadOption2View from '../views/sena/SenafadOption2View.vue'
+import SenafiOption1View from '../views/sena/SenafiOption1View.vue'
+import SenafiOption2View from '../views/sena/SenafiOption2View.vue'
+import SenafociOption1View from '../views/sena/SenafociOption1View.vue'
+import SenafociOption2View from '../views/sena/SenafociOption2View.vue'
+import SenacefOption1View from '../views/sena/SenacefOption1View.vue'
+import SenacefOption2View from '../views/sena/SenacefOption2View.vue'
+import SenasipOption1View from '../views/sena/SenasipOption1View.vue'
+import SenasipOption2View from '../views/sena/SenasipOption2View.vue'
+import SenaesOption1View from '../views/sena/SenaesOption1View.vue'
+import SenaesOption2View from '../views/sena/SenaesOption2View.vue'
+import SenamoOption1View from '../views/sena/SenamoOption1View.vue'
+import SenamoOption2View from '../views/sena/SenamoOption2View.vue'
+import SenacrexOption1View from '../views/sena/SenacrexOption1View.vue'
+import SenacrexOption2View from '../views/sena/SenacrexOption2View.vue'
 
 export const accessibleRouteNames = [
   'dashboard',
@@ -31,9 +44,7 @@ export const accessibleRouteNames = [
   'cars',
   'speakers',
   'rooms',
-  'evaluations',
-  'sante',
-  'paiements_configuration',
+ 
   'reports',
   'settings',
   'users',
@@ -44,27 +55,27 @@ export const accessibleRouteNames = [
 // Route names here must match the children defined in AppLayout.vue
 // ("<key>-option1" / "<key>-option2").
 const senaModules = [
-  { key: 'senafad', label: 'SENAFAD' },
-  { key: 'senafi', label: 'SENAFI' },
-  { key: 'senafoci', label: 'SENAFOCI' },
-  { key: 'senacef', label: 'SENACEF' },
-  { key: 'senasip', label: 'SENASIP' },
-  { key: 'senaes', label: 'SENAES' },
-  { key: 'senamo', label: 'SENAMO' },
-  { key: 'senacrex', label: 'SENACREX' },
+  { key: 'senafad', label: 'SENAFAD', views: [SenafadOption1View, SenafadOption2View] },
+  { key: 'senafi', label: 'SENAFI', views: [SenafiOption1View, SenafiOption2View] },
+  { key: 'senafoci', label: 'SENAFOCI', views: [SenafociOption1View, SenafociOption2View] },
+  { key: 'senacef', label: 'SENACEF', views: [SenacefOption1View, SenacefOption2View] },
+  { key: 'senasip', label: 'SENASIP', views: [SenasipOption1View, SenasipOption2View] },
+  { key: 'senaes', label: 'SENAES', views: [SenaesOption1View, SenaesOption2View] },
+  { key: 'senamo', label: 'SENAMO', views: [SenamoOption1View, SenamoOption2View] },
+  { key: 'senacrex', label: 'SENACREX', views: [SenacrexOption1View, SenacrexOption2View] },
 ]
 
 const senaRoutes = senaModules.flatMap((mod) => [
   {
     path: `${mod.key}/option-1`,
     name: `${mod.key}-option1`,
-    component: PlaceholderView,
+    component: mod.views[0],
     meta: { title: `${mod.label} — Option 1`, pageKey: `${mod.key}-option1` },
   },
   {
     path: `${mod.key}/option-2`,
     name: `${mod.key}-option2`,
-    component: PlaceholderView,
+    component: mod.views[1],
     meta: { title: `${mod.label} — Option 2`, pageKey: `${mod.key}-option2` },
   },
 ])
@@ -97,24 +108,8 @@ const routes = [
         component: SeminarsView,
         meta: { title: 'Séminaires', pageKey: 'seminars' },
       },
-      {
-        path: 'evaluations',
-        name: 'evaluations',
-        component: EvaluationsView,
-        meta: { title: 'Evaluations', pageKey: 'evaluations' },
-      },
-      {
-        path: 'sante',
-        name: 'sante',
-        component: SanteView,
-        meta: { title: 'Santé', pageKey: 'sante' },
-      },
-      {
-        path: 'paiements_configuration',
-        name: 'paiements_configuration',
-        component: PaiementsView,
-        meta: { title: 'Paiements', pageKey: 'paiements_configuration' },
-      },
+      
+    
       {
         path: 'quota',
         name: 'quota',
@@ -191,7 +186,11 @@ router.beforeEach((to) => {
   }
 
   const pageKey = to.meta?.pageKey
-  if (to.meta.requiresAuth && pageKey && !auth.canView(pageKey)) {
+
+  // ✅ Ignorer le check canView pour les routes sena (option1/option2)
+  const isSenaRoute = senaRouteNames.includes(to.name)
+
+  if (to.meta.requiresAuth && pageKey && !isSenaRoute && !auth.canView(pageKey)) {
     const fallback = auth.firstAccessibleRoute(accessibleRouteNames)
     return fallback ? { name: fallback } : { name: 'login' }
   }
