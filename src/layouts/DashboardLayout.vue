@@ -4,34 +4,65 @@ import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import SidebarIcon from '../components/SidebarIcon.vue'
 
-// â”€â”€â”€ Stores & router â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ---- Stores & router -------------------------------------------------
 const auth   = useAuthStore()
 const route  = useRoute()
 const router = useRouter()
 
-// â”€â”€â”€ State â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ---- State -------------------------------------------------------------
 const sidebarCollapsed  = ref(false)
 const mobileOpen        = ref(false)
 const showUserDropdown  = ref(false)
+const expandedMenus     = ref(new Set())
 
-// â”€â”€â”€ Computed â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ---- Computed -----------------------------------------------------------
 const pageTitle = computed(() => route.meta?.title || 'Dashboard')
 const currentPageKey = computed(() => route.meta?.pageKey || '')
 const canEditCurrentPage = computed(() => auth.canEdit(currentPageKey.value))
 
-// â”€â”€â”€ Navigation items â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ---- Navigation items -----------------------------------------------------
+// Simple links shown directly in the "Principal" section.
 const navItems = [
-  { name: 'dashboard',               label: 'Tableau de bord', icon: 'grid'        },
-  { name: 'seminars',                label: 'SÃ©minaires',       icon: 'calendar'    },
-  { name: 'participants',            label: 'Participants',      icon: 'users'       },
-  { name: 'quota',                   label: 'Quota',             icon: 'activity'    },
-  { name: 'cars',                    label: 'Cars',              icon: 'truck'       },
-  { name: 'speakers',                label: 'Intervenants',      icon: 'mic'         },
-  { name: 'rooms',                   label: 'Salles',            icon: 'map-pin'     },
-  { name: 'evaluations',             label: 'Ã‰valuations',       icon: 'star'        },
-  { name: 'sante',                   label: 'SantÃ©',             icon: 'heart'       },
-  { name: 'paiements_configuration', label: 'Paiements',         icon: 'credit-card' },
-  { name: 'reports',                 label: 'Rapports',          icon: 'bar-chart'   },
+  { name: 'dashboard', label: 'Tableau de bord', icon: 'grid' },
+]
+
+// Collapsible groups: each one renders a header row + an "Option 1" /
+// "Option 2" sub-menu. Sub-link route names follow the pattern
+// "<group>-option1" / "<group>-option2" — adjust them to match your
+// router config if your route names are different.
+const expandableMenus = [
+  { name: 'senafad',  label: 'SENAFAD',  icon: 'folder', children: [
+    { name: 'senafad-option1',  label: 'Option 1' },
+    { name: 'senafad-option2',  label: 'Option 2' },
+  ]},
+  { name: 'senafi',   label: 'SENAFI',   icon: 'folder', children: [
+    { name: 'senafi-option1',   label: 'Option 1' },
+    { name: 'senafi-option2',   label: 'Option 2' },
+  ]},
+  { name: 'senafoci', label: 'SENAFOCI', icon: 'folder', children: [
+    { name: 'senafoci-option1', label: 'Option 1' },
+    { name: 'senafoci-option2', label: 'Option 2' },
+  ]},
+  { name: 'senacef',  label: 'SENACEF',  icon: 'folder', children: [
+    { name: 'senacef-option1',  label: 'Option 1' },
+    { name: 'senacef-option2',  label: 'Option 2' },
+  ]},
+  { name: 'senasip',  label: 'SENASIP',  icon: 'folder', children: [
+    { name: 'senasip-option1',  label: 'Option 1' },
+    { name: 'senasip-option2',  label: 'Option 2' },
+  ]},
+  { name: 'senaes',   label: 'SENAES',   icon: 'folder', children: [
+    { name: 'senaes-option1',   label: 'Option 1' },
+    { name: 'senaes-option2',   label: 'Option 2' },
+  ]},
+  { name: 'senamo',   label: 'SENAMO',   icon: 'folder', children: [
+    { name: 'senamo-option1',   label: 'Option 1' },
+    { name: 'senamo-option2',   label: 'Option 2' },
+  ]},
+  { name: 'senacrex', label: 'SENACREX', icon: 'folder', children: [
+    { name: 'senacrex-option1', label: 'Option 1' },
+    { name: 'senacrex-option2', label: 'Option 2' },
+  ]},
 ]
 
 const bottomItems = [
@@ -40,9 +71,10 @@ const bottomItems = [
 ]
 
 const visibleNavItems = computed(() => navItems.filter(item => auth.canView(item.name)))
+const visibleExpandableMenus = computed(() => expandableMenus)
 const visibleBottomItems = computed(() => bottomItems.filter(item => auth.canView(item.name)))
 
-// â”€â”€â”€ Methods â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ---- Methods ----------------------------------------------------------
 function handleLogout() {
   auth.logout()
   router.push({ name: 'login' })
@@ -61,14 +93,26 @@ function getInitials(name) {
     .toUpperCase()
     .slice(0, 2)
 }
+
+function toggleMenu(name) {
+  const next = new Set(expandedMenus.value)
+  next.has(name) ? next.delete(name) : next.add(name)
+  expandedMenus.value = next
+}
+
+function hasActiveChild(menu) {
+  return menu.children.some(child => route.name === child.name)
+}
+
+function isMenuOpen(menu) {
+  return expandedMenus.value.has(menu.name) || hasActiveChild(menu)
+}
 </script>
 
 <template>
   <div class="app-shell" :class="{ 'sidebar-collapsed': sidebarCollapsed }">
 
-    <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-         MOBILE OVERLAY
-    â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+    <!-- MOBILE OVERLAY -->
     <Transition name="overlay">
       <div
         v-if="mobileOpen"
@@ -78,9 +122,7 @@ function getInitials(name) {
       />
     </Transition>
 
-    <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-         SIDEBAR
-    â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+    <!-- SIDEBAR -->
     <aside
       class="sidebar"
       :class="{ 'mobile-open': mobileOpen }"
@@ -106,6 +148,7 @@ function getInitials(name) {
       <div class="nav-section">
         <p class="nav-section-label">Principal</p>
         <nav>
+          <!-- Simple links (Dashboard) -->
           <RouterLink
             v-for="item in visibleNavItems"
             :key="item.name"
@@ -121,6 +164,43 @@ function getInitials(name) {
             <span class="nav-label">{{ item.label }}</span>
             <span v-if="route.name === item.name" class="active-indicator" />
           </RouterLink>
+
+          <!-- Collapsible groups: SENAFAD, SENAFI, SENAFOCI, SENACEF, SENASIP, SENAES, SENAMO, SENACREX -->
+          <div
+            v-for="menu in visibleExpandableMenus"
+            :key="menu.name"
+            class="menu-group"
+          >
+            <button
+              type="button"
+              class="nav-item menu-header"
+              :class="{ 'menu-header--active': hasActiveChild(menu) }"
+              :title="sidebarCollapsed ? menu.label : undefined"
+              @click="toggleMenu(menu.name)"
+            >
+              <span class="nav-icon"><SidebarIcon :name="menu.icon" /></span>
+              <span class="nav-label">{{ menu.label }}</span>
+              <span class="menu-chevron" :class="{ 'menu-chevron--open': isMenuOpen(menu) }">
+                <SidebarIcon name="chevron-down" />
+              </span>
+            </button>
+
+            <div class="submenu" :class="{ 'submenu--open': isMenuOpen(menu) }">
+              <div class="submenu-inner">
+                <RouterLink
+                  v-for="child in menu.children"
+                  :key="child.name"
+                  :to="{ name: child.name }"
+                  class="submenu-link"
+                  :class="{ active: route.name === child.name }"
+                  @click="closeMobile"
+                >
+                  <span class="submenu-dot" />
+                  <span class="nav-label">{{ child.label }}</span>
+                </RouterLink>
+              </div>
+            </div>
+          </div>
         </nav>
       </div>
 
@@ -143,11 +223,11 @@ function getInitials(name) {
 
           <button
             class="nav-item nav-item--danger"
-            :title="sidebarCollapsed ? 'DÃ©connexion' : undefined"
+            :title="sidebarCollapsed ? 'Déconnexion' : undefined"
             @click="handleLogout"
           >
             <span class="nav-icon"><SidebarIcon name="log-out" /></span>
-            <span class="nav-label">DÃ©connexion</span>
+            <span class="nav-label">Déconnexion</span>
           </button>
         </div>
 
@@ -163,18 +243,16 @@ function getInitials(name) {
         <!-- Collapse toggle (desktop) -->
         <button
           class="collapse-btn"
-          :title="sidebarCollapsed ? 'Agrandir la sidebar' : 'RÃ©duire la sidebar'"
+          :title="sidebarCollapsed ? 'Agrandir la sidebar' : 'Réduire la sidebar'"
           @click="sidebarCollapsed = !sidebarCollapsed"
         >
           <SidebarIcon :name="sidebarCollapsed ? 'chevrons-right' : 'chevrons-left'" />
-          <span class="nav-label">{{ sidebarCollapsed ? 'Agrandir' : 'RÃ©duire' }}</span>
+          <span class="nav-label">{{ sidebarCollapsed ? 'Agrandir' : 'Réduire' }}</span>
         </button>
       </div>
     </aside>
 
-    <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-         MAIN
-    â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+    <!-- MAIN -->
     <div class="main-area">
 
       <!-- Navbar -->
@@ -237,12 +315,12 @@ function getInitials(name) {
                 </RouterLink>
                 <RouterLink :to="{ name: 'settings' }" class="dropdown-item">
                   <SidebarIcon name="settings" />
-                  ParamÃ¨tres
+                  Paramètres
                 </RouterLink>
                 <div class="dropdown-divider"></div>
                 <button class="dropdown-item dropdown-item--danger" @click="handleLogout">
                   <SidebarIcon name="log-out" />
-                  DÃ©connexion
+                  Déconnexion
                 </button>
               </div>
             </Transition>
@@ -277,9 +355,7 @@ function getInitials(name) {
   grid-template-columns: var(--sw-c) 1fr;
 }
 
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-   MOBILE OVERLAY
-â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+/* MOBILE OVERLAY */
 .mobile-overlay {
   display: none;
   position: fixed;
@@ -289,9 +365,7 @@ function getInitials(name) {
   backdrop-filter: blur(2px);
 }
 
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-   SIDEBAR
-â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+/* SIDEBAR */
 .sidebar {
   background: var(--sb-bg);
   display: flex;
@@ -466,6 +540,92 @@ function getInitials(name) {
   opacity: 0;
 }
 
+/* Collapsible groups (SENAFAD, SENAFI, ...) */
+.menu-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.menu-header--active {
+  color: rgba(255,255,255,0.78);
+}
+
+.menu-chevron {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  margin-left: auto;
+  color: rgba(255,255,255,0.35);
+  transition: transform var(--t);
+}
+
+.menu-chevron--open {
+  transform: rotate(180deg);
+}
+
+.submenu {
+  display: grid;
+  grid-template-rows: 0fr;
+  overflow: hidden;
+  transition: grid-template-rows 0.22s ease;
+}
+
+.submenu--open {
+  grid-template-rows: 1fr;
+}
+
+.submenu-inner {
+  overflow: hidden;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 2px 0;
+}
+
+.submenu-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px 8px 34px;
+  border-radius: 8px;
+  color: rgba(255,255,255,0.55);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 440;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  transition: background var(--t), color var(--t);
+}
+
+.submenu-link:hover {
+  background: var(--sb-hover);
+  color: rgba(255,255,255,0.82);
+}
+
+.submenu-link.active {
+  background: var(--sb-active);
+  color: var(--sb-active-tx);
+  font-weight: 540;
+}
+
+.submenu-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.5;
+  flex-shrink: 0;
+}
+
+.sidebar-collapsed .menu-chevron,
+.sidebar-collapsed .submenu {
+  display: none;
+}
+
 /* Sidebar bottom area */
 .sidebar-bottom {
   margin-top: auto;
@@ -555,9 +715,7 @@ function getInitials(name) {
   font-size: 12px;
 }
 
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-   MAIN AREA
-â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+/* MAIN AREA */
 .main-area {
   display: flex;
   flex-direction: column;
@@ -566,9 +724,7 @@ function getInitials(name) {
   min-width: 0;
 }
 
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-   NAVBAR
-â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+/* NAVBAR */
 .navbar {
   height: var(--nh);
   background: var(--surface);
@@ -769,18 +925,14 @@ function getInitials(name) {
   margin: 5px 0;
 }
 
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-   CONTENT
-â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+/* CONTENT */
 .content {
   flex: 1;
   padding: 28px;
   overflow-y: auto;
 }
 
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-   TRANSITIONS
-â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+/* TRANSITIONS */
 .page-enter-active,
 .page-leave-active {
   transition: opacity 0.15s ease, transform 0.15s ease;
@@ -836,9 +988,7 @@ function getInitials(name) {
   font-weight: 800;
 }
 
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-   RESPONSIVE â€” mobile (â‰¤ 768px)
-â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+/* RESPONSIVE — mobile (<= 768px) */
 @media (max-width: 768px) {
   .app-shell {
     grid-template-columns: 0 1fr;
@@ -882,15 +1032,16 @@ function getInitials(name) {
     pointer-events: auto;
   }
 
+  .sidebar-collapsed .menu-chevron { display: flex; }
+  .sidebar-collapsed .submenu { display: grid; }
+
   .user-meta { display: none; }
   .user-trigger > svg:last-child { display: none; }
 
   .content { padding: 20px 16px; }
 }
 
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-   RESPONSIVE â€” tablet (769px â€“ 1024px)
-â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+/* RESPONSIVE — tablet (769px – 1024px) */
 @media (min-width: 769px) and (max-width: 1024px) {
   .user-meta { display: none; }
   .user-trigger > svg:last-child { display: none; }

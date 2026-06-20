@@ -18,6 +18,11 @@ import QuotaView from '../views/QuotaView.vue'
 import CarsView from '../views/CarsView.vue'
 import UsersView from '../views/UsersView.vue'
 
+// Shared stub used by the new collapsible-menu sub-pages until each one
+// gets its own dedicated view. Swap it out per route below whenever a
+// real view is ready (e.g. component: SenafadOption1View).
+import PlaceholderView from '../views/Placeholderview.vue'
+
 export const accessibleRouteNames = [
   'dashboard',
   'seminars',
@@ -33,6 +38,39 @@ export const accessibleRouteNames = [
   'settings',
   'users',
 ]
+
+// ---- Collapsible sidebar groups: SENAFAD, SENAFI, SENAFOCI, SENACEF,
+// SENASIP, SENAES, SENAMO, SENACREX — each with "Option 1" / "Option 2".
+// Route names here must match the children defined in AppLayout.vue
+// ("<key>-option1" / "<key>-option2").
+const senaModules = [
+  { key: 'senafad', label: 'SENAFAD' },
+  { key: 'senafi', label: 'SENAFI' },
+  { key: 'senafoci', label: 'SENAFOCI' },
+  { key: 'senacef', label: 'SENACEF' },
+  { key: 'senasip', label: 'SENASIP' },
+  { key: 'senaes', label: 'SENAES' },
+  { key: 'senamo', label: 'SENAMO' },
+  { key: 'senacrex', label: 'SENACREX' },
+]
+
+const senaRoutes = senaModules.flatMap((mod) => [
+  {
+    path: `${mod.key}/option-1`,
+    name: `${mod.key}-option1`,
+    component: PlaceholderView,
+    meta: { title: `${mod.label} — Option 1`, pageKey: `${mod.key}-option1` },
+  },
+  {
+    path: `${mod.key}/option-2`,
+    name: `${mod.key}-option2`,
+    component: PlaceholderView,
+    meta: { title: `${mod.label} — Option 2`, pageKey: `${mod.key}-option2` },
+  },
+])
+
+const senaRouteNames = senaModules.flatMap((mod) => [`${mod.key}-option1`, `${mod.key}-option2`])
+accessibleRouteNames.push(...senaRouteNames)
 
 const routes = [
   {
@@ -125,6 +163,9 @@ const routes = [
         component: UsersView,
         meta: { title: 'Utilisateurs', pageKey: 'users' },
       },
+
+      // SENAFAD / SENAFI / SENAFOCI / SENACEF / SENASIP / SENAES / SENAMO / SENACREX
+      ...senaRoutes,
     ],
   },
   {
