@@ -76,15 +76,9 @@ function color(i) { return PALETTE[i % PALETTE.length] }
       <div class="greeting">
         <div>
           <h2>Tableau de bord 👋</h2>
-          <p>SENAFOI {{ anneeActive }} — Vue d'ensemble des statistiques</p>
+          <p>Les departements de l' AEEMCI — Vue d'ensemble des statistiques</p>
         </div>
-        <RouterLink :to="{ name: 'seminars' }" class="btn-primary">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-            <circle cx="9" cy="7" r="4"/>
-          </svg>
-          Gérer les séminaristes
-        </RouterLink>
+       
       </div>
 
       <!-- ── KPI Row ── -->
@@ -153,32 +147,6 @@ function color(i) { return PALETTE[i % PALETTE.length] }
         </div>
       </div>
 
-      <!-- ── Historique présences ── -->
-      <div class="section-card" v-if="historique.length">
-        <div class="section-head">
-          <span class="section-title">Présences — 7 derniers jours</span>
-          <RouterLink :to="{ name: 'seminars' }" class="link-more">Pointer les présences →</RouterLink>
-        </div>
-        <div class="histo-wrap">
-          <div class="histo-bars">
-            <div v-for="h in historique" :key="h.date_presence" class="histo-col">
-              <div class="histo-nums">
-                <span class="h-num h-p">{{ h.presents }}</span>
-                <span class="h-num h-a">{{ h.absents }}</span>
-              </div>
-              <div class="histo-bar-wrap">
-                <div class="histo-bar hb-p" :style="{ height: Math.max(6, Math.round(h.presents / totalInscrits * 120)) + 'px' }"></div>
-                <div class="histo-bar hb-a" :style="{ height: Math.max(3, Math.round(h.absents  / totalInscrits * 120)) + 'px' }"></div>
-              </div>
-              <span class="histo-date">{{ h.date_presence.slice(5) }}</span>
-            </div>
-          </div>
-          <div class="histo-legend">
-            <span class="hleg hleg-p">Présents</span>
-            <span class="hleg hleg-a">Absents</span>
-          </div>
-        </div>
-      </div>
 
       <!-- ── Stats grid principale ── -->
       <div class="stats-main-grid">
