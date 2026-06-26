@@ -83,6 +83,7 @@ function normalizeMembre(m) {
     ...m,
     nomComplet: nomComplet || 'Sans nom',
     avatar: initiales(nomComplet || '?'),
+    photo: m.photo || m.photo_membre || m.avatar_url || '',
     regionLabel: m.secretariat_poste || m.region || m.sr_debut || 'Non defini',
     sousComiteLabel: m.sous_comite || 'Non defini',
   }
@@ -161,6 +162,9 @@ function formatMontant(value, devise = 'XOF') {
 }
 
 const pendingTotal = computed(() => total.value || candidats.value.length)
+const currentPageTotal = computed(() => candidats.value.length)
+const withContactTotal = computed(() => candidats.value.filter((m) => m.contact || m.numero_wave).length)
+const typedTotal = computed(() => candidats.value.filter((m) => m.type_membre === 'ACTUEL' || m.type_membre === 'ANCIEN').length)
 
 onMounted(() => fetchPending(1))
 </script>
@@ -176,12 +180,16 @@ onMounted(() => fetchPending(1))
         <span class="bc-active">Paiements à valider</span>
       </div>
 
-      <div class="page-header">
+      <div class="page-header pay-hero">
         <div>
+          <div class="hero-kicker">Validation manuelle</div>
           <h1 class="page-title">Paiements à valider</h1>
           <p class="page-sub">{{ pendingTotal }} membre(s) sans carte payee · action API {{ activeAction }}</p>
         </div>
-        <button class="btn-primary" @click="fetchPending(page)">Actualiser</button>
+        <div class="hero-actions">
+          <button class="btn-outline" @click="search = ''">Effacer filtre</button>
+          <button class="btn-primary" @click="fetchPending(page)">Actualiser</button>
+        </div>
       </div>
 
       <div v-if="success" class="search-banner success-banner">{{ success }}</div>
@@ -206,8 +214,30 @@ onMounted(() => fetchPending(1))
             </svg>
           </div>
           <div class="kpi-data">
-            <span class="kpi-val">{{ candidats.length }}</span>
+            <span class="kpi-val">{{ currentPageTotal }}</span>
             <span class="kpi-label">Affiches sur la page</span>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon kpi-green">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.79 19.79 0 0 1 3.08 5.18 2 2 0 0 1 5 3h3a2 2 0 0 1 2 1.72c.12.9.32 1.77.59 2.61a2 2 0 0 1-.45 2.11L9 10.59a16 16 0 0 0 4.41 4.41l1.15-1.14a2 2 0 0 1 2.11-.45c.84.27 1.71.47 2.61.59A2 2 0 0 1 22 16.92z"/>
+            </svg>
+          </div>
+          <div class="kpi-data">
+            <span class="kpi-val">{{ withContactTotal }}</span>
+            <span class="kpi-label">Avec contact</span>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon kpi-red">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+            </svg>
+          </div>
+          <div class="kpi-data">
+            <span class="kpi-val">{{ typedTotal }}</span>
+            <span class="kpi-label">Typés actuel/ancien</span>
           </div>
         </div>
       </div>
@@ -237,11 +267,12 @@ onMounted(() => fetchPending(1))
                 <th>Contact</th>
                 <th>Montant</th>
                 <th>Statut</th>
+                <th>Type</th>
                 <th>Action</th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="m in candidats" :key="m.id" class="table-row">
+              <tr v-for="m in candidats" :key="m.id" class="table-row" :class="{ 'row-old-member': m.type_membre === 'ANCIEN' }">
                 <td>
                   <div class="person">
                     <div v-if="m.photo" class="avatar-photo"><img :src="m.photo" :alt="m.nomComplet" /></div>
@@ -259,6 +290,7 @@ onMounted(() => fetchPending(1))
                 <td><span class="td-cell">{{ m.contact || '-' }}</span></td>
                 <td><span class="td-cell">{{ formatMontant(m.somme_paye || 1000, m.devise_paiement || 'XOF') }}</span></td>
                 <td><span class="badge b-pending">{{ m.statut_paiement || 'NON_PAYE' }}</span></td>
+                <td><span class="badge" :class="m.type_membre === 'ANCIEN' ? 'b-old' : 'b-soft'">{{ m.type_membre || 'NON_DEFINI' }}</span></td>
                 <td>
                   <button class="btn-primary btn-small" @click="openValidation(m)">Valider paiement</button>
                 </td>
@@ -291,7 +323,8 @@ onMounted(() => fetchPending(1))
         <div class="modal">
           <div class="modal-header">
             <div class="modal-ident">
-              <div class="modal-avatar" :style="{ background: avatarColor(selected.avatar) + '20', color: avatarColor(selected.avatar) }">{{ selected.avatar }}</div>
+              <div v-if="selected.photo" class="modal-avatar-photo"><img :src="selected.photo" :alt="selected.nomComplet" /></div>
+              <div v-else class="modal-avatar" :style="{ background: avatarColor(selected.avatar) + '20', color: avatarColor(selected.avatar) }">{{ selected.avatar }}</div>
               <div>
                 <h3 class="modal-title">Valider le paiement</h3>
                 <p class="modal-mat">{{ selected.nomComplet }} · {{ selected.matricule || 'Sans matricule' }}</p>
@@ -329,16 +362,21 @@ onMounted(() => fetchPending(1))
 .bc-root:hover { color: #6366f1; }
 .bc-active { color: #111; font-weight: 560; }
 .page-header { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+.pay-hero { background: #fff; border: 1px solid rgba(0,0,0,.07); border-radius: 16px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,.04); }
+.hero-kicker { display: inline-flex; margin-bottom: 5px; padding: 4px 8px; border-radius: 999px; background: rgba(99,102,241,.08); color: #4f46e5; font-size: 10.5px; font-weight: 760; text-transform: uppercase; letter-spacing: .06em; }
+.hero-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .page-title { font-size: 22px; font-weight: 720; color: #111; letter-spacing: -.03em; margin-bottom: 3px; }
 .page-sub { font-size: 13px; color: #9ca3af; font-weight: 430; }
 .state-block { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 70px 20px; color: #6b7280; font-size: 14px; }
 .spinner { width: 36px; height: 36px; border: 3px solid rgba(99,102,241,.15); border-top-color: #6366f1; border-radius: 50%; animation: spin .7s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
-.kpi-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.kpi-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
 .kpi-card { background: #fff; border: 1px solid rgba(0,0,0,.07); border-radius: 14px; padding: 18px 20px; display: flex; align-items: center; gap: 14px; box-shadow: 0 1px 3px rgba(0,0,0,.04); }
 .kpi-icon { width: 40px; height: 40px; border-radius: 11px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .kpi-blue { background: rgba(99,102,241,.1); color: #6366f1; }
 .kpi-amber { background: rgba(245,158,11,.1); color: #f59e0b; }
+.kpi-green { background: rgba(16,185,129,.1); color: #059669; }
+.kpi-red { background: rgba(239,68,68,.1); color: #dc2626; }
 .kpi-data { display: flex; flex-direction: column; flex: 1; }
 .kpi-val { font-size: 22px; font-weight: 730; color: #111; letter-spacing: -.04em; line-height: 1; }
 .kpi-label { font-size: 11.5px; color: #9ca3af; font-weight: 440; margin-top: 3px; }
@@ -372,6 +410,10 @@ onMounted(() => fetchPending(1))
 .td-cell { color: #374151; white-space: nowrap; font-size: 13px; }
 .badge { display: inline-flex; align-items: center; font-size: 11px; font-weight: 610; padding: 3px 9px; border-radius: 20px; letter-spacing: .02em; white-space: nowrap; }
 .b-pending { background: rgba(245,158,11,.1); color: #b45309; }
+.b-soft { background: rgba(99,102,241,.09); color: #4f46e5; }
+.b-old { background: rgba(107,114,128,.12); color: #4b5563; }
+.row-old-member { background: rgba(107,114,128,.07); }
+.row-old-member:hover { background: rgba(107,114,128,.11); }
 .pagination { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-top: 1px solid rgba(0,0,0,.06); background: #fafafa; flex-wrap: wrap; gap: 10px; }
 .pag-info { font-size: 12px; color: #9ca3af; }
 .pag-info strong { color: #374151; }
@@ -387,6 +429,8 @@ onMounted(() => fetchPending(1))
 .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; border-bottom: 1px solid rgba(0,0,0,.06); background: #fafafa; }
 .modal-ident { display: flex; align-items: center; gap: 12px; }
 .modal-avatar { width: 52px; height: 52px; border-radius: 14px; font-size: 15px; }
+.modal-avatar-photo { width: 52px; height: 52px; border-radius: 14px; overflow: hidden; border: 1px solid rgba(0,0,0,.08); flex-shrink: 0; }
+.modal-avatar-photo img { width: 100%; height: 100%; object-fit: cover; }
 .modal-title { font-size: 16px; font-weight: 680; color: #111; letter-spacing: -.02em; margin: 0 0 2px; }
 .modal-mat { font-size: 11.5px; color: #9ca3af; margin: 0; letter-spacing: .03em; }
 .modal-close { width: 32px; height: 32px; border-radius: 9px; border: 1px solid rgba(0,0,0,.09); background: #fff; color: #6b7280; display: flex; align-items: center; justify-content: center; cursor: pointer; }

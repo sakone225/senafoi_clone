@@ -27,6 +27,7 @@ const pageOptions = [
   { key: 'senamo-option2',   label: 'SENAMO — Option 2',  group: 'SENAMO'  },
   { key: 'senacrex-option1', label: 'SENACREX — Option 1', group: 'SENACREX' },
   { key: 'senacrex-option2', label: 'SENACREX — Option 2', group: 'SENACREX' },
+  { key: 'senacrex-actualites', label: 'SENACREX — Actualites', group: 'SENACREX' },
 
   // Compte
   { key: 'settings',         label: 'Paramètres',    group: 'Compte' },

@@ -16,6 +16,7 @@ import UsersView      from '../views/UsersView.vue'
 
 import SenafadOption1View  from '../views/sena/SenafadMembresView.vue'
 import SenafadOption2View  from '../views/sena/SenafadOption2View.vue'
+import SenafadRepertoireView from '../views/sena/SenafadRepertoireView.vue'
 import SenafiOption1View   from '../views/sena/SenafiOption1View.vue'
 import SenafiOption2View   from '../views/sena/SenafiOption2View.vue'
 import SenafociOption1View from '../views/sena/SenafociOption1View.vue'
@@ -30,6 +31,7 @@ import SenamoOption1View   from '../views/sena/SenamoOption1View.vue'
 import SenamoOption2View   from '../views/sena/SenamoOption2View.vue'
 import SenacrexOption1View from '../views/sena/SenacrexOption1View.vue'
 import SenacrexOption2View from '../views/sena/SenacrexOption2View.vue'
+import SenacrexActualitesView from '../views/sena/SenacrexActualitesView.vue'
 
 export const accessibleRouteNames = [
   'dashboard',
@@ -72,11 +74,31 @@ const senaRoutes = senaModules.flatMap((mod) => [
       pageKey: `${mod.key}-option2`
     },
   },
+  ...(mod.key === 'senafad' ? [{
+    path: `${mod.key}/repertoire`,
+    name: 'senafad-repertoire',
+    component: SenafadRepertoireView,
+    meta: {
+      title: 'Répertoire SMS',
+      pageKey: 'senafad-repertoire'
+    },
+  }] : []),
+  ...(mod.key === 'senacrex' ? [{
+    path: `${mod.key}/actualites`,
+    name: 'senacrex-actualites',
+    component: SenacrexActualitesView,
+    meta: {
+      title: 'Actualites AEEMCI',
+      pageKey: 'senacrex-actualites'
+    },
+  }] : []),
 ])
 
 const senaRouteNames = senaModules.flatMap((mod) => [
   `${mod.key}-option1`,
   `${mod.key}-option2`,
+  ...(mod.key === 'senafad' ? ['senafad-repertoire'] : []),
+  ...(mod.key === 'senacrex' ? ['senacrex-actualites'] : []),
   'login-history',
 ])
 accessibleRouteNames.push(...senaRouteNames)

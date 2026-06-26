@@ -102,6 +102,7 @@ function normalizeMembre(m) {
     ...m,
     nomComplet: nomComplet || 'Sans nom',
     avatar: initiales(nomComplet || '?'),
+    photo: m.photo || m.photo_membre || m.avatar_url || '',
     statutLabel: m.statut || 'NON_DEFINI',
     regionLabel: m.secretariat_poste || m.region || m.sr_debut || 'Non defini',
     sousComiteLabel: m.sous_comite || 'Non defini',
