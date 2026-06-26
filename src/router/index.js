@@ -50,7 +50,7 @@ const senaModules = [
 
 const senaRoutes = senaModules.flatMap((mod) => [
   {
-    path: `${mod.key}/option-1`,
+    path: mod.key === 'senafad' ? `${mod.key}/liste_membres` : `${mod.key}/option-1`,
     name: `${mod.key}-option1`,
     component: mod.views[0],
      meta: {
@@ -59,11 +59,18 @@ const senaRoutes = senaModules.flatMap((mod) => [
       pageKey: `${mod.key}-option1`
     },
   },
+  ...(mod.key === 'senafad' ? [{
+    path: `${mod.key}/option-1`,
+    redirect: { name: 'senafad-option1' },
+  }] : []),
   {
     path: `${mod.key}/option-2`,
     name: `${mod.key}-option2`,
     component: mod.views[1],
-    meta: { title: `${mod.label} — Option 2`, pageKey: `${mod.key}-option2` },
+    meta: {
+      title: mod.key === 'senafad' ? 'Paiements à valider' : `${mod.label} — Option 2`,
+      pageKey: `${mod.key}-option2`
+    },
   },
 ])
 

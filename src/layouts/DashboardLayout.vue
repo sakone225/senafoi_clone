@@ -40,7 +40,7 @@ const navItems = [
 const expandableMenus = [
   { name: 'senafad',  label: 'SENAFAD',  icon: 'folder', children: [
     { name: 'senafad-option1',  label: 'Liste des membres' },
-    { name: 'senafad-option2',  label: 'Option 2' },
+    { name: 'senafad-option2',  label: 'Paiements à valider' },
   ]},
   { name: 'senafi',   label: 'SENAFI',   icon: 'folder', children: [
     { name: 'senafi-option1',   label: 'Option 1' },
