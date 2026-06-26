@@ -14,7 +14,7 @@ import UsersView      from '../views/UsersView.vue'
 // SeminarsView, ParticipantsView, SpeakersView, RoomsView,
 // ReportsView, QuotaView, CarsView
 
-import SenafadOption1View  from '../views/sena/SenafadOption1View.vue'
+import SenafadOption1View  from '../views/sena/SenafadMembresView.vue'
 import SenafadOption2View  from '../views/sena/SenafadOption2View.vue'
 import SenafiOption1View   from '../views/sena/SenafiOption1View.vue'
 import SenafiOption2View   from '../views/sena/SenafiOption2View.vue'
@@ -53,7 +53,11 @@ const senaRoutes = senaModules.flatMap((mod) => [
     path: `${mod.key}/option-1`,
     name: `${mod.key}-option1`,
     component: mod.views[0],
-    meta: { title: `${mod.label} — Option 1`, pageKey: `${mod.key}-option1` },
+     meta: {
+      // ← titre personnalisé pour senafad, générique pour les autres
+      title: mod.key === 'senafad' ? 'Liste des membres' : `${mod.label} — Option 1`,
+      pageKey: `${mod.key}-option1`
+    },
   },
   {
     path: `${mod.key}/option-2`,

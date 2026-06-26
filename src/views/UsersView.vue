@@ -11,7 +11,7 @@ const pageOptions = [
   { key: 'dashboard',        label: 'Tableau de bord', group: 'Principal' },
 
   // Modules SENA*
-  { key: 'senafad-option1',  label: 'SENAFAD — Option 1', group: 'SENAFAD' },
+  { key: 'senafad-option1',  label: 'SENAFAD — Liste des membres', group: 'SENAFAD' },
   { key: 'senafad-option2',  label: 'SENAFAD — Option 2', group: 'SENAFAD' },
   { key: 'senafi-option1',   label: 'SENAFI — Option 1',  group: 'SENAFI'  },
   { key: 'senafi-option2',   label: 'SENAFI — Option 2',  group: 'SENAFI'  },

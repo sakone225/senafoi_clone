@@ -18,7 +18,17 @@ const expandedMenus     = ref(new Set())
 // ---- Computed -----------------------------------------------------------
 const pageTitle          = computed(() => route.meta?.title || 'Dashboard')
 const currentPageKey     = computed(() => route.meta?.pageKey || '')
-const canEditCurrentPage = computed(() => auth.canEdit(currentPageKey.value))
+
+
+const isSenaPage = computed(() => {
+  const key = currentPageKey.value
+  return key?.includes('sena') || false
+})
+
+const canEditCurrentPage = computed(() => {
+  if (isSenaPage.value) return true  // ← les pages sena gèrent leurs propres permissions
+  return auth.canEdit(currentPageKey.value)
+})
 
 // ---- Navigation --------------------------------------------------------
 // Lien principal
@@ -29,7 +39,7 @@ const navItems = [
 // Groupes dépliables SENA*
 const expandableMenus = [
   { name: 'senafad',  label: 'SENAFAD',  icon: 'folder', children: [
-    { name: 'senafad-option1',  label: 'Option 1' },
+    { name: 'senafad-option1',  label: 'Liste des membres' },
     { name: 'senafad-option2',  label: 'Option 2' },
   ]},
   { name: 'senafi',   label: 'SENAFI',   icon: 'folder', children: [
@@ -123,7 +133,7 @@ function isMenuOpen(menu) {
             <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"/>
           </svg>
         </div>
-        <span class="logo-text">Seminar</span>
+        <span class="logo-text">Departement</span>
         <button class="mobile-close" @click="closeMobile" aria-label="Fermer le menu">
           <SidebarIcon name="x" />
         </button>
